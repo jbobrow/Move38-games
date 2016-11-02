@@ -17,6 +17,9 @@
 *.mod
 *.smod
 
+# Directory files
+.DS_Store
+
 # Compiled Static libraries
 *.lai
 *.la
