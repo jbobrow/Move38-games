@@ -8,9 +8,12 @@
  *  Technical Details:
  *    A long press on the tile changes the color of the tile for prototyping (switch state 1 or 2)
  *    
- *    Tiles resets to wait mode when double press occurs (pulse white)
+ *    Tiles resets health to full when triple press occurs
  *    
- *    Game starts when single press in wait mode (enter player 1 & player 2 states)
+ *    ToDo: Show when tile gets boost
+ *    ToDo: Verify alone (5 times testing positive as alone means it is alone...)
+ *    
+ *    ToDo: Game starts when single press in wait mode (enter player 1 & player 2 states)
  *    Shares the start message with neighbors (hold on green for 3 pulses...)
  *    
  *    States for game piece
@@ -57,6 +60,8 @@ uint8_t brightness[60] = {
 uint8_t displayColor[3];
 
 uint8_t neighbors[6];
+uint8_t prevNeighbors[6];
+uint8_t bAlone = 0;
 
 uint8_t team = 0; // which team are we part of blue or red (player 1 or player 2)
 
@@ -65,13 +70,14 @@ uint8_t bDidLongPress = 0;
 
 uint32_t gameStartTime = 0;   // to know how far into the game we are
 float health = 100.0;         // 100% health for start of life
-float damageRate = 4.0;       // how much health is lost / second
+float damageRate = 2.0;       // how much health is lost / second
 float moveBoost = 20.0;       // 20% health boost when moved
 
 // helpers for the pulse rate
 uint32_t timePassedBuffer = 0;
 uint8_t prevIdx = 0;
 
+uint32_t lastPressTimes[2] = {0,0};
 uint32_t lastUpdateTime = 0;
 uint32_t updateFrequency = 50;  //milliseconds
 
@@ -138,23 +144,31 @@ void loop() {
       }
 
       // determine rate of life based on surroundings (sad but true)
-      if(numNeighbors == 0) {
+      if(numNeighbors != 0) {
+        // we are not alone
+        // if we were, give a move boost
+        if(bAlone == 1) {
+          health += moveBoost;
+          bAlone = 0;
+        }
+        
+        if(friends > enemies) {
+          // don't die quickly
+          damageRate = 2.0;
+        }
+        else if (friends == enemies) {
+          // normal rate
+          damageRate = 3.0;
+        }
+        else { // implied friends < enemies
+          // surrounded by enemies, this is gonna be rough
+          damageRate = 4.0;
+        }
+      }
+      else {
         // we are lonely or being moved. stay at the current damage rate
+        bAlone = 1;
       }
-      else if(friends > enemies) {
-        // don't die quickly
-        damageRate = 4.0;
-      }
-      else if (friends == enemies) {
-        // normal rate
-        damageRate = 4.0;
-      }
-      else { // implied friends < enemies
-        // surrounded by enemies, this is gonna be rough
-        damageRate = 10.0;
-      }
-
-      
     }
   }
 
@@ -188,9 +202,9 @@ void loop() {
     // how did we get here?
   }
   
-  uint8_t r = 4 + (displayColor[0] * brightness[idx])/255.0;
-  uint8_t g = 4 + (displayColor[1] * brightness[idx])/255.0;
-  uint8_t b = 4 + (displayColor[2] * brightness[idx])/255.0;
+  uint8_t r = (displayColor[0] * (32 + brightness[idx]))/255.0;
+  uint8_t g = (displayColor[1] * (32 + brightness[idx]))/255.0;
+  uint8_t b = (displayColor[2] * (32 + brightness[idx]))/255.0;
   
   displayColor[0] = r; 
   displayColor[1] = g; 
@@ -207,22 +221,27 @@ void loop() {
  * starts a game if waiting to play
  */
 void button() {
-  // reset health
-  health = 100.0;
-  // set state based on team(color)
-  switch(team) {
-    case 0: setState(1); break;
-    case 1: setState(2); break;
-    default: setState(1); break;
-  }
+  if(getTimer() - lastPressTimes[0] < 1000 && getTimer() - lastPressTimes[1] < 2000) {
+    // triple press
+    // reset health
+    health = 100.0;
+    // set state based on team(color)
+    switch(team) {
+      case 0: setState(1); break;
+      case 1: setState(2); break;
+      default: setState(1); break;
+    }
+    lastPressTime = getTimer();
+    lastUpdateTime = getTimer();
+    bDidLongPress = 0;
 
-//  if(getState() == 4) {
-//    // start the game
-//    setState(1);
-//  }
-  lastPressTime = getTimer();
-  lastUpdateTime = getTimer();
-  bDidLongPress = 0;
+  }
+  else {
+    // single press
+    bDidLongPress = 0;
+  }
+  lastPressTimes[1] = lastPressTimes[0];
+  lastPressTimes[0] = getTimer();
 }
 
 
