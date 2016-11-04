@@ -63,10 +63,14 @@ uint8_t team = 0; // which team are we part of blue or red (player 1 or player 2
 uint32_t lastPressTime = 0;
 uint8_t bDidLongPress = 0;
 
-uint32_t gameStartTime = 0.0; // to know how far into the game we are
+uint32_t gameStartTime = 0;   // to know how far into the game we are
 float health = 100.0;         // 100% health for start of life
-float damageRate = 5.0;       // how much health is lost / second
+float damageRate = 4.0;       // how much health is lost / second
 float moveBoost = 20.0;       // 20% health boost when moved
+
+// helpers for the pulse rate
+uint32_t timePassedBuffer = 0;
+uint8_t prevIdx = 0;
 
 uint32_t lastUpdateTime = 0;
 uint32_t updateFrequency = 50;  //milliseconds
@@ -92,8 +96,8 @@ void loop() {
     // check how much life is remaining
     health -= damageRate * ((curTime - lastUpdateTime) / 1000.0);
     // same as health = health - ....;
- 
-    if(health <= 10.0) {
+    
+    if(health <= 1.0) {
       // we are dead, show dead state
       health = 0.0;
       setState(3);
@@ -139,11 +143,11 @@ void loop() {
       }
       else if(friends > enemies) {
         // don't die quickly
-        damageRate = 5.0;
+        damageRate = 4.0;
       }
       else if (friends == enemies) {
         // normal rate
-        damageRate = 5.0;
+        damageRate = 4.0;
       }
       else { // implied friends < enemies
         // surrounded by enemies, this is gonna be rough
@@ -154,16 +158,15 @@ void loop() {
     }
   }
 
-  // determine how fast we pulse (i.e. show health status)
-  float pulsePeriod = health * 30.0;
-  if(pulsePeriod <= 30.0) {
-    setState(3);  // die, die, die
-    pulsePeriod = 3000.0; // slow dead pulse period
+  // determine period
+  uint32_t period = health * 30.0; // sqrt(health)
+  if(getState() == 3) {
+    period = 4000;
   }
-
-  uint16_t sinLoc = curTime % (int)pulsePeriod;  // integer between 0 and period
-  uint8_t idx = 60.0 * sinLoc / pulsePeriod;     // integer between 0 and 59
-
+  uint32_t timePassed = curTime - lastUpdateTime;
+  uint8_t idx = getNextPosition(60, prevIdx, timePassed, period);
+  prevIdx = idx;
+  
   // display your state based on the team you are on
   if(getState() == 3) {
     // display state using white (dead white)
@@ -238,5 +241,42 @@ void longPress() {
     // set the current state to alive as that color
     setState(team + 1);
   }
+}
+
+/*
+ * Returns the next position given a previous position and the amount of time passed
+ * The position is relative to the period provided
+ * 
+ * numSteps <uint8_t> number of steps in the cycle, values returned will fall within this range [0,numSteps]
+ * currentPosition <uint8_t> value between 0 and numSteps for location in pattern
+ * timePassed <uint32_t> millis since last updated position
+ * period <uint16_T> length of a single cycle in millis 
+ */
+uint8_t getNextPosition(uint8_t numSteps, uint8_t currentPosition, uint32_t timePassed, uint32_t period) {
+  
+  //get normalized value of current position
+  float pos = currentPosition / (float)numSteps;
+  
+  //calculate increment based on how much time passed over this period
+  float increment = (timePassed + timePassedBuffer) / (float)period;
+  
+  // increment our position based on time passed
+  float nextPos = pos + increment;
+
+  // if we incremented past completion, start the cycle over
+  if(nextPos >= 1.0) {
+    nextPos -= 1.0;
+  }
+
+  // return the position in terms of steps along the total path
+  uint8_t nextIndex = nextPos * numSteps;
+  if(nextIndex == currentPosition) {
+    timePassedBuffer += timePassed;
+  }
+  else {
+    timePassedBuffer = 0;
+  }
+  
+  return nextIndex;
 }
 
