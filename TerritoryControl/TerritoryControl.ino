@@ -62,6 +62,7 @@ uint8_t displayColor[3];
 uint8_t neighbors[6];
 uint8_t prevNeighbors[6];
 uint8_t bAlone = 0;
+uint8_t aloneCount = 0;
 
 uint8_t team = 0; // which team are we part of blue or red (player 1 or player 2)
 
@@ -79,12 +80,12 @@ uint8_t prevIdx = 0;
 
 uint32_t lastPressTimes[2] = {0,0};
 uint32_t lastUpdateTime = 0;
-uint32_t updateFrequency = 50;  //milliseconds
+uint32_t updateFrequency = 20;  //milliseconds
 
 void setup() {
   // put your setup code here, to run once:
   setButtonCallback(button);
-  setLongButtonCallback(longPress, 1000);
+  setLongButtonCallback(longPress, 2500); // 2.5 seconds to change color
   setState(1);  // test starting as player 1
   setMicOff();
   setTimeout(180);  // 3 minute
@@ -114,6 +115,10 @@ void loop() {
       uint8_t friends = 0;
       uint8_t enemies = 0;
       uint8_t numNeighbors = 0;
+
+      // assume we are alone
+      if(aloneCount < 254)
+        aloneCount++;
       
       // count friends and enemies
       for(uint8_t i=0; i<6; i++) {
@@ -121,6 +126,7 @@ void loop() {
         // count total number of neighbors
         if(neighbors[i] != 0) {
           numNeighbors++;
+          aloneCount = 0;
         }
         
         // check team red first
@@ -167,7 +173,11 @@ void loop() {
       }
       else {
         // we are lonely or being moved. stay at the current damage rate
-        bAlone = 1;
+
+        // make sure we register as alone for 10 reads
+        if(aloneCount > 10) {
+          bAlone = 1;
+        }
       }
     }
   }
