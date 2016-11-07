@@ -8,7 +8,7 @@ int flipstate = 0;             // reference state
 uint8_t numTeams = 3;
 uint8_t bLongPressed = 0;
 uint8_t colors[3][3] = {{0,255,255},  // Cyan      
-                        {255,192,32},  // Orange
+                        {255,64,0},  // Orange
                         {255,0,255}}; // Magenta
                         
 void setup() {

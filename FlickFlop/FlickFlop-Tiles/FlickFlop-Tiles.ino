@@ -20,15 +20,19 @@
 uint8_t neighbors[6];
 int numNeighbors = 0; 
 uint8_t colors[3][3] = {{0,255,255},  // Cyan      
-                        {255,255,0},  // Yellow
+                        {255,64,0},  // orange
                         {255,0,255}}; // Magenta
 
+uint8_t white[3] = {255, 255, 255};   // White
+int bCelebrate = 0; 
+uint32_t celebrateTime = 0; 
 uint8_t team = 0;
 uint8_t numTeams = 3;
-
 uint16_t neighborDelay = 200;
+int celebrateDuration = 300;  //time of celebratory burst
 uint32_t lastUpdateTime = 0;
 uint8_t bLongPressed = 0;
+int startColor = 0; 
                         
 void setup () {
   setColor(colors[1]);  //set initial color
@@ -71,22 +75,36 @@ void loop () {
       }
     }
   }
+  
+  if ((numNeighbors !=0) && (prevNumNeighbors == 0)) { //if was alone and now has neighbors 
 
-  if ((numNeighbors !=0) && (prevNumNeighbors == 0)) { //if was alone and now has neighbors
-    // if the base is team 1, show team one color
-    if (getState() == 1) {
-      setColor(colors[0]); 
+    // do we celebrate
+    if(getState() == (team + 1)) {
+      bCelebrate = 1;
+      celebrateTime = getTimer();  
     }
-    // if the base is team 2, show team two color
-    else if (getState() == 2) {
-      setColor(colors[1]); 
+    else {
+      bCelebrate = 0;
     }
-    // if the base is team 3, show team 3 color
-    else if (getState() == 3) {
-      setColor(colors[2]); 
-    }
+    
+    //show new team color
+    
+    team = getState()-1; 
+    setColor(colors[team]);
+    
   }
   else{}
+
+  if(bCelebrate == 1) {
+    if(getTimer() - celebrateTime < celebrateDuration) {    
+      setColor(white);
+    }
+    else {
+      bCelebrate = 0;
+      // set back to actual color
+      setColor(colors[team]);
+    }
+  }
   
 }
 
@@ -108,7 +126,7 @@ void longButton() {
     // switch which team we are on
     team = (team + 1) % numTeams;
     
-    setColor(colors[team]); 
+    setColor(colors[team]);  
 
   }
 }
