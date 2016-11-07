@@ -16,20 +16,15 @@
  *  by Nick Bentley
  *  11.02.2016
  */
- 
-//check continuously to see if tile has become attached
-//if tile has neighbors...
-//match state to neighbor states
-//if tile changed from zero to more than zero neighbors...
-//permanently fix the color according to the global state
 
 uint8_t neighbors[6];
 int numNeighbors = 0; 
-uint8_t colors[2][3] = {{204,0,0},  // Red - player 1             
-                        {0,0,255}}; // Blue - player 2
+uint8_t colors[3][3] = {{0,255,255},  // Cyan      
+                        {255,255,0},  // Yellow
+                        {255,0,255}}; // Magenta
 
 uint8_t team = 0;
-uint8_t numTeams = 2;
+uint8_t numTeams = 3;
 
 uint16_t neighborDelay = 200;
 uint32_t lastUpdateTime = 0;
@@ -86,6 +81,10 @@ void loop () {
     else if (getState() == 2) {
       setColor(colors[1]); 
     }
+    // if the base is team 3, show team 3 color
+    else if (getState() == 3) {
+      setColor(colors[2]); 
+    }
   }
   else{}
   
@@ -109,12 +108,8 @@ void longButton() {
     // switch which team we are on
     team = (team + 1) % numTeams;
     
-    if (team == 0) {
-      setColor(colors[0]); 
-    }
-    else if (team == 1) {
-      setColor(colors[1]); 
-    }
+    setColor(colors[team]); 
+
   }
 }
 
