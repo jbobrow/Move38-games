@@ -88,7 +88,7 @@ void setup() {
   setLongButtonCallback(longPress, 2500); // 2.5 seconds to change color
   setState(1);  // test starting as player 1
   setMicOff();
-  setTimeout(180);  // 3 minute
+  setTimeout(600);  // 10 minute
 }
 
 void loop() {
