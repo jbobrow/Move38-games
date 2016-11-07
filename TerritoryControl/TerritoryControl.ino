@@ -18,8 +18,8 @@
  *    
  *    States for game piece
  *    0 = no piece (never in state 0)
- *    1 = player 1 alive (glow red)
- *    2 = player 2 alive (glow blue)
+ *    1 = player 1 alive (glow purple)
+ *    2 = player 2 alive (glow green)
  *    3 = player 1/2 dead (pulse white)
  *    4 = wait mode (pulse white)
  *    5 = start mode (green starting lights pattern)
@@ -43,9 +43,9 @@ enum gameStates {
   start
 };
 
-uint8_t colors[3][3] = {{255,0,0},     // red   (player 1)
-                       {0,0,255},      // blue  (player 2)
-                       {255,255,255}}; // white (dead state)
+uint8_t colors[3][3] = {{153,0,255},   // purple (player 1)
+                       {64,255,0},     // green  (player 2)
+                       {255,255,255}}; // white  (dead state)
 
 uint8_t brightness[60] = {
   64,71,77,84,90,96,102,107,
@@ -64,7 +64,7 @@ uint8_t prevNeighbors[6];
 uint8_t bAlone = 0;
 uint8_t aloneCount = 0;
 
-uint8_t team = 0; // which team are we part of blue or red (player 1 or player 2)
+uint8_t team = 0; // which team are we part of purple or green (player 1 or player 2)
 
 uint32_t lastPressTime = 0;
 uint8_t bDidLongPress = 0;
@@ -129,21 +129,21 @@ void loop() {
           aloneCount = 0;
         }
         
-        // check team red first
-        if(team == 0) {                 // if on red team
-          if(neighbors[i] == 1) {       // if red neighbor
+        // check team purple first
+        if(team == 0) {                 // if on purple team
+          if(neighbors[i] == 1) {       // if purple neighbor
             friends++;                  // count them as a friend
           }
-          else if(neighbors[i] == 2) {  // if blue neighbor
+          else if(neighbors[i] == 2) {  // if green neighbor
             enemies++;                  // count them as an enemy
           }
         }
-        // check team blue next
-        else if(team == 1) {            // if on blue team
-          if(neighbors[i] == 2) {       // if blue neighbor
+        // check team green next
+        else if(team == 1) {            // if on green team
+          if(neighbors[i] == 2) {       // if green neighbor
             friends++;                  // count them as a friend
           }
-          else if(neighbors[i] == 1) {  // if red neighbor
+          else if(neighbors[i] == 1) {  // if purple neighbor
             enemies++;                  // count them as an enemy
           }
         }
@@ -199,12 +199,12 @@ void loop() {
     displayColor[2] = colors[2][2];
   }
   else if(team == 0) {
-    // display state using red
+    // display state using purple
     displayColor[0] = colors[0][0];
     displayColor[1] = colors[0][1];
     displayColor[2] = colors[0][2];
   } else if(team == 1){
-    // display state using blue
+    // display state using green
     displayColor[0] = colors[1][0];
     displayColor[1] = colors[1][1];
     displayColor[2] = colors[1][2];
