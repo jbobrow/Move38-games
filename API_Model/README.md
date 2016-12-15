@@ -1,49 +1,87 @@
-void getNeighbor(int n)
+##Blinks API##
 
-boolean isAlone()
+A simple API for programming Blink tiles to perform needed tasks
+**A default blank sketch**
+```c
+void setup() {  
+}
 
+void loop() {
+	// continuous time logic here
+}
 
-void setColor(int r, int g, int b)  // instant
+void buttonPressed() {
+	// handle button down here
+}
 
+void onStep() {
+	// discrete time logic here
+}
 
-void fadeTo(Color c, int ms)  // timed change to color
+```
 
-void fadeToAndReturn(Color c, int ms)  // timed change to color and back
+###Blink methods###
 
-void fadeTo(int r, int g, int b, int ms)  //
+**getNeighbor**
+```c
+int getNeighbor(int id);
+// pass it a neighbor id (0-5) and get the value for that neighbor returned
+```
 
+**isAlone**
+```c
+boolean isAlone();
+// returns true when the tile has no neighbors
+// same as checking all 6 sides and seeing that they return 0
+```
 
-void blink(int ms) // defaults to on/off of current color
+**setColor**
+```c
+void setColor(int r, int g, int b);
+// instantly changes the color of the RGB LED to the values passed
+```
 
-void blink(int ms, Color c) // defaults to on/off of this color
+**fadeTo**
+```c
+void fadeTo(Color c, int ms);  // timed change to color
 
-void blink(int ms, Color[n] c) // send array of colors to blink between
+void fadeToAndReturn(Color c, int ms);  // timed change to color and back
 
-void blink(int ms, int min, int max) // low and high levels for blinking and the time between them
+void fadeTo(int r, int g, int b, int ms);  //
+```
 
-void blink(int ms, Color c, int min, int max) // low and high levels for blinking and the time between them
+**fadeTo**
+```c
+void blink(int ms); // defaults to on/off of current color
 
+void blink(int ms, Color c); // defaults to on/off of this color
 
-void pulse(int ms) // phase
+void blink(int ms, Color[n] c); // send array of colors to blink between
 
-void pulse(int ms, int min, int max) // phase w/ low and high brightness
+void blink(int ms, int min, int max); // low and high levels for blinking and the time between them
 
-void pulse(int ms, Colors[n] c) // phased pulse between colors (depends on fadeTo)
+void blink(int ms, Color c, int min, int max); // low and high levels for blinking and the time between them
+```
 
-//setButtonCallback(button);
+**pulse**
+```c
+void pulse(int ms); // phase
 
-void buttonPressed()
-void buttonReleased()
+void pulse(int ms, int min, int max); // phase w/ low and high brightness
+
+void pulse(int ms, Colors[n] c); // phased pulse between colors (depends on fadeTo)
+```
+
+**button**
+```c
+void buttonPressed();
+void buttonReleased();
 
 void setButtonClickThreshold(int ms); // defaulted to 200ms, but function available to make slower or faster clicking part of the game
 
-void buttonClicked()
-void buttonDoubleClicked()
-void buttonTripleClicked()
+void buttonClicked();
+void buttonDoubleClicked();
+void buttonTripleClicked();
 
-void buttonLongPressed()
-
-
-// Library
-// When connected, flash brighter
-//
+void buttonLongPressed();
+```
