@@ -50,7 +50,7 @@ void fadeToAndReturn(Color c, int ms);  // timed change to color and back
 void fadeTo(int r, int g, int b, int ms);  //
 ```
 
-**fadeTo**
+**blink**
 ```c
 void blink(int ms); // defaults to on/off of current color
 
