@@ -34,14 +34,6 @@ int neighbors[6];
 ```
 
 ###Blink methods###
-
-**isAlone**
-```c
-boolean isAlone();
-// returns true when the tile has no neighbors
-// same as checking all 6 sides and seeing that they return 0
-```
-
 **setState**
 ```c
 void setState(int n);
@@ -54,6 +46,22 @@ void setColor(int r, int g, int b);
 // instantly changes the color of the RGB LED to the values passed
 ```
 
+**sendStep**
+```c
+void sendStep();
+// communicates for all connected neighbors to step forward in discrete time
+// used for games that are not based on real-time and need to globally update the board at "the same time"
+```
+
+**isAlone**
+```c
+boolean isAlone();
+// returns true when the tile has no neighbors
+// same as checking all 6 sides and seeing that they return 0
+```
+
+###Blink display manager methods###
+These functions should not be used in `loop` since they will handle animation on their own. (i.e.  
 **fadeTo**
 ```c
 void fadeTo(Color c, int ms);  // timed change to color
@@ -83,6 +91,34 @@ void pulse(int ms); // phase
 void pulse(int ms, int min, int max); // phase w/ low and high brightness
 
 void pulse(int ms, Colors[n] c); // phased pulse between colors (depends on fadeTo)
+```
+
+###Blink callbacks###
+
+**neighborChanged**
+```c
+void neighborChanged();
+// handles when a neighbor is changed
+// (should also know which neighbors have been changed)
+```
+
+**onStep**
+```c
+void onStep();
+// handles a discrete step
+// (i.e. received a sent step from a neighbor, or called a step was invoked locally)
+```
+
+**onWake**
+```c
+void onWake();
+// called once when woken (either by button press or neighbor)
+```
+
+**onSleep**
+```c
+void onSleep();
+// called once just before going to sleep (could be a good time to store information if in memory and needed later...)
 ```
 
 **button**
