@@ -61,7 +61,8 @@ boolean isAlone();
 ```
 
 ###Blink display manager methods###
-These functions should not be used in `loop` since they will handle animation on their own. (i.e.  
+These functions should not be used in `loop` since they will handle animation on their own.
+Use them in a callback, for example, when the button is pressed, `fadeToAndReturn(RED, 500);` will turn red over the course of half a second and then return to its previous color.
 **fadeTo**
 ```c
 void fadeTo(Color c, int ms);  // timed change to color
