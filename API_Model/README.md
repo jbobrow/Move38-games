@@ -10,6 +10,11 @@ void loop() {
 	// continuous time logic here
 }
 
+void neighborChanged() {
+	// handles when a neighbor is changed
+	// (should also know which neighbors have been changed)
+}
+
 void buttonPressed() {
 	// handle button down here
 }
@@ -20,19 +25,27 @@ void onStep() {
 
 ```
 
-###Blink methods###
+###Blink global variables###
 
-**getNeighbor**
+**neighbors**
 ```c
-int getNeighbor(int id);
-// pass it a neighbor id (0-5) and get the value for that neighbor returned
+int neighbors[6];
+// publicly accessible neighbor array, allows for quick simple access to any of the neighbors at all times
 ```
+
+###Blink methods###
 
 **isAlone**
 ```c
 boolean isAlone();
 // returns true when the tile has no neighbors
 // same as checking all 6 sides and seeing that they return 0
+```
+
+**setState**
+```c
+void setState(int n);
+// sets the local state of the tile, which is communicated to other tiles ~30fps
 ```
 
 **setColor**
