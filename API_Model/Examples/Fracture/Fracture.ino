@@ -5,9 +5,13 @@
  *  and none of their own color (state)
  *  
  */
+
+// assuming neighbors and numNeighbors are global static variable
  
-int numTeams = 6;
-Color colors[6] = {RED, BLUE, YELLOW, MAGENTA, CYAN, GREEN};
+int numTeams = 3;
+int colors[3][3] = {{255,0,0},        // Red                    
+                    {0,0,255},        // Blue
+                    {255,255,0}};     // Yellow
 
 void setup() {
   // put your setup code here, to run once:
@@ -20,21 +24,23 @@ void loop() {
 
 void buttonTriplePressed() {
   // change team
-  setState((myState() + 1) % numTeams);
+  setState((myState() + 1) % numTeams + 1);
 }
 
 void neighborChanged() {
   boolean isHappy = true;
   for(int i=0; i<6; i++) {
-    if(getNeighbor(i) == myState()){
+    if(neighbors[i] == myState()){
       isHappy = false;
     }
   }
 
-  if(getNumNeighbors() >= 2 && isHappy) {
+  if(numNeighbors >= 2 && isHappy) {
     blink(1000);
   }
   else {
-    setColor(colors[myState()]);
+    setColor(colors[myState()][0],
+             colors[myState()][1],
+             colors[myState()][2]);
   }
 }
