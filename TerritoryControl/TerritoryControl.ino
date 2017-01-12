@@ -69,6 +69,10 @@ uint8_t team = 0; // which team are we part of purple or green (player 1 or play
 uint32_t lastPressTime = 0;
 uint8_t bDidLongPress = 0;
 
+// show when receive boost by flashing for 600 milliseconds (2 flashes)
+uint32_t boostTime = 0;
+uint16_t boostDuration = 600;
+
 uint32_t gameStartTime = 0;   // to know how far into the game we are
 float health = 100.0;         // 100% health for start of life
 float damageRate = 2.0;       // how much health is lost / second
@@ -156,6 +160,7 @@ void loop() {
         if(bAlone == 1) {
           health += moveBoost;
           bAlone = 0;
+          boostTime = curTime;
         }
         
         if(friends > enemies) {
@@ -211,10 +216,26 @@ void loop() {
   } else {
     // how did we get here?
   }
-  
-  uint8_t r = (displayColor[0] * (32 + brightness[idx]))/255.0;
-  uint8_t g = (displayColor[1] * (32 + brightness[idx]))/255.0;
-  uint8_t b = (displayColor[2] * (32 + brightness[idx]))/255.0;
+
+  uint8_t r, g, b;
+  if(curTime - boostTime < boostDuration) {
+    if((curTime - boostTime / 200) % 2 == 0 ) {
+      r = displayColor[0];
+      g = displayColor[1];
+      b = displayColor[2];      
+    }
+    else {
+      r = 0;
+      g = 0;
+      b = 0;
+    }
+  }
+  else {
+    r = (displayColor[0] * (32 + brightness[idx]))/255.0;
+    g = (displayColor[1] * (32 + brightness[idx]))/255.0;
+    b = (displayColor[2] * (32 + brightness[idx]))/255.0;
+  }
+
   
   displayColor[0] = r; 
   displayColor[1] = g; 
