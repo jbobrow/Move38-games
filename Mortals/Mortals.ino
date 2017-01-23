@@ -1,29 +1,30 @@
-/*  Territory control w/ time(Game)
- *  
+/*  Mortals(Game)
+ *
  *  Setup: 2 player game. Tiles die slowly over time. Quicker when surrounded by enemies, and slower when surrounded by family. Moving a tile boosts its life.
- *    
- *  When a tile is moved, it regains 20% health  
+ *
+ *  When a tile is moved, it regains 20% health
  *  When a tile hits an opponents tile, the opponents tile takes a 20% damage
- *    
+ *
  *  Technical Details:
  *    A long press on the tile changes the color of the tile for prototyping (switch state 1 or 2)
- *    
+ *
  *    Tiles resets health to full when triple press occurs
- *    
+ *
  *    ToDo: Show when tile gets boost
  *    ToDo: Verify alone (5 times testing positive as alone means it is alone...)
- *    
+ *
  *    ToDo: Game starts when single press in wait mode (enter player 1 & player 2 states)
  *    Shares the start message with neighbors (hold on green for 3 pulses...)
- *    
+ *
  *    States for game piece
  *    0 = no piece (never in state 0)
  *    1 = player 1 alive (glow purple)
  *    2 = player 2 alive (glow green)
  *    3 = player 1/2 dead (pulse white)
+ *    // NOT IMPLEMENTED BELOW THIS LINE
  *    4 = wait mode (pulse white)
  *    5 = start mode (green starting lights pattern)
- * 
+ *
  *  Game devopment by: Nick Bently, Jonathan Bobrow
  *
  *  --------------------------------------------------------------------------------------------------
@@ -31,8 +32,8 @@
  *  into the right directory i.e. <user home directory>/Documents/Arduino/hardware/AutomaTiles
  *  Then open the Arduino IDE and select Tools > Board > "AutomaTile"
  *  Now you should be good to go :) (thanks to the hard work of Joshua Sloane)
- *  -------------------------------------------------------------------------------------------------- 
- *     
+ *  --------------------------------------------------------------------------------------------------
+ *
  *  by Jonathan Bobrow
  *  10.07.2016
  */
@@ -107,7 +108,7 @@ void loop() {
     // check how much life is remaining
     health -= damageRate * ((curTime - lastUpdateTime) / 1000.0);
     // same as health = health - ....;
-    
+
     if(health <= 1.0) {
       // we are dead, show dead state
       health = 0.0;
@@ -123,16 +124,16 @@ void loop() {
       // assume we are alone
       if(aloneCount < 254)
         aloneCount++;
-      
+
       // count friends and enemies
       for(uint8_t i=0; i<6; i++) {
-        
+
         // count total number of neighbors
         if(neighbors[i] != 0) {
           numNeighbors++;
           aloneCount = 0;
         }
-        
+
         // check team purple first
         if(team == 0) {                 // if on purple team
           if(neighbors[i] == 1) {       // if purple neighbor
@@ -162,7 +163,7 @@ void loop() {
           bAlone = 0;
           boostTime = curTime;
         }
-        
+
         if(friends > enemies) {
           // don't die quickly
           damageRate = 2.0;
@@ -195,7 +196,7 @@ void loop() {
   uint32_t timePassed = curTime - lastUpdateTime;
   uint8_t idx = getNextPosition(60, prevIdx, timePassed, period);
   prevIdx = idx;
-  
+
   // display your state based on the team you are on
   if(getState() == 3) {
     // display state using white (dead white)
@@ -222,7 +223,7 @@ void loop() {
     if((curTime - boostTime / 200) % 2 == 0 ) {
       r = displayColor[0];
       g = displayColor[1];
-      b = displayColor[2];      
+      b = displayColor[2];
     }
     else {
       r = 0;
@@ -236,12 +237,12 @@ void loop() {
     b = (displayColor[2] * (32 + brightness[idx]))/255.0;
   }
 
-  
-  displayColor[0] = r; 
-  displayColor[1] = g; 
+
+  displayColor[0] = r;
+  displayColor[1] = g;
   displayColor[2] = b;
-  
-  setColor(displayColor); 
+
+  setColor(displayColor);
 
   lastUpdateTime = curTime;
 }
@@ -284,10 +285,10 @@ void longPress() {
   if(bDidLongPress == 0) {
     // ensure we handle long press only once
     bDidLongPress = 1;
-    
+
     // if player 1, change to player 2
     team = (team + 1) % 2;  // two player game
-    
+
     // set the current state to alive as that color
     setState(team + 1);
   }
@@ -296,20 +297,20 @@ void longPress() {
 /*
  * Returns the next position given a previous position and the amount of time passed
  * The position is relative to the period provided
- * 
+ *
  * numSteps <uint8_t> number of steps in the cycle, values returned will fall within this range [0,numSteps]
  * currentPosition <uint8_t> value between 0 and numSteps for location in pattern
  * timePassed <uint32_t> millis since last updated position
- * period <uint16_T> length of a single cycle in millis 
+ * period <uint16_T> length of a single cycle in millis
  */
 uint8_t getNextPosition(uint8_t numSteps, uint8_t currentPosition, uint32_t timePassed, uint32_t period) {
-  
+
   //get normalized value of current position
   float pos = currentPosition / (float)numSteps;
-  
+
   //calculate increment based on how much time passed over this period
   float increment = (timePassed + timePassedBuffer) / (float)period;
-  
+
   // increment our position based on time passed
   float nextPos = pos + increment;
 
@@ -326,7 +327,6 @@ uint8_t getNextPosition(uint8_t numSteps, uint8_t currentPosition, uint32_t time
   else {
     timePassedBuffer = 0;
   }
-  
+
   return nextIndex;
 }
-
