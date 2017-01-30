@@ -28,6 +28,7 @@
 
 uint32_t lastUpdateTime = 0;
 uint32_t updateFrequency = 50;  //milliseconds
+uint32_t lastPressTimes[2] = {0,0};
 
 uint8_t diversityValue;
 uint8_t possibleDiversityValue;
@@ -74,11 +75,10 @@ uint8_t didNeighborsChangeCountThreshold = 10;
 uint8_t isBlinking = 0;
 
 void setup() {
-//  setLongButtonCallback(button, 2000);  // setup a button handler (only for long press)
-//  setStepCallback(step);          // setup a step handler
+  setButtonCallback(button);      // setup a button handler
   setState(1);                    // set initial state
   setMicOff();                    // listen to step forward
-  setTimeout(180);                // 3 minutes
+  setTimeout(300);               // 30 minutes
 }
 
 void loop() {
@@ -146,9 +146,9 @@ void loop() {
     int8_t idx = (curTime % (60 * pulseRate)) / pulseRate;
     
     //pulse color
-    outputColor[0] = int(colors[getState()-1][0] / 255.0 * (159 + brightness[idx]));  // Red output value
-    outputColor[1] = int(colors[getState()-1][1] / 255.0 * (159 + brightness[idx]));  // Green output value
-    outputColor[2] = int(colors[getState()-1][2] / 255.0 * (159 + brightness[idx]));  // Blue output value
+    outputColor[0] = int(colors[getState()-1][0] / 255.0 * (63 + 2 * brightness[idx]));  // Red output value
+    outputColor[1] = int(colors[getState()-1][1] / 255.0 * (63 + 2 * brightness[idx]));  // Green output value
+    outputColor[2] = int(colors[getState()-1][2] / 255.0 * (63 + 2 * brightness[idx]));  // Blue output value
 
 
     if(isBlinking && (curTime % 500) > 250) {
@@ -161,4 +161,17 @@ void loop() {
     // update our update time
     lastUpdateTime = curTime;
   }
+}
+
+/*
+ * Button Press
+ * starts a game if waiting to play
+ */
+void button() {
+  if(getTimer() - lastPressTimes[0] < 1000 && getTimer() - lastPressTimes[1] < 2000) {
+    // triple press
+    setState((getState() % 4) + 1); // increment to next team color
+  }
+  lastPressTimes[1] = lastPressTimes[0];
+  lastPressTimes[0] = getTimer();
 }
