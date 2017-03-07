@@ -1,29 +1,22 @@
 /*  Mortals(Game)
  *
- *  Setup: 2 player game. Tiles die slowly over time. Quicker when surrounded by enemies, and slower when surrounded by family. Moving a tile boosts its life.
+ *  Setup: 2 player game. Tiles die slowly over time, all at the same rate. Moving a single tile to a new place allows it to suck life from surrounding tiles, friendly or enemy.
  *
- *  When a tile is moved, it regains 20% health
- *  When a tile hits an opponents tile, the opponents tile takes a 20% damage
+ *  When a tile is moved, it sucks 10 points of health from its neighbors
  *
  *  Technical Details:
  *    A long press on the tile changes the color of the tile for prototyping (switch state 1 or 2)
  *
  *    Tiles resets health to full when triple press occurs
  *
- *    ToDo: Show when tile gets boost
- *    ToDo: Verify alone (5 times testing positive as alone means it is alone...)
- *
- *    ToDo: Game starts when single press in wait mode (enter player 1 & player 2 states)
- *    Shares the start message with neighbors (hold on green for 3 pulses...)
- *
  *    States for game piece
- *    0 = no piece (never in state 0)
+ *    0 = no piece
  *    1 = player 1 alive (glow purple)
  *    2 = player 2 alive (glow green)
- *    3 = player 1/2 dead (pulse white)
- *    // NOT IMPLEMENTED BELOW THIS LINE
- *    4 = wait mode (pulse white)
- *    5 = start mode (green starting lights pattern)
+ *    3 = player 1 alive moving solo
+ *    4 = player 2 alive moving solo
+ *    5 = dead (pulse white)
+ *
  *
  *  Game devopment by: Nick Bently, Jonathan Bobrow
  *
@@ -35,14 +28,8 @@
  *  --------------------------------------------------------------------------------------------------
  *
  *  by Jonathan Bobrow
- *  10.07.2016
+ *  03.06.2017
  */
-enum gameStates {
-  alive,
-  dead,
-  waiting,
-  start
-};
 
 uint8_t colors[3][3] = {{153,0,255},   // purple (player 1)
                        {64,255,0},     // green  (player 2)
@@ -75,9 +62,12 @@ uint32_t boostTime = 0;
 uint16_t boostDuration = 600;
 
 uint32_t gameStartTime = 0;   // to know how far into the game we are
-float health = 100.0;         // 100% health for start of life
+float health = 120.0;         // 120pts health for start of life
 float damageRate = 2.0;       // how much health is lost / second
-float moveBoost = 20.0;       // 20% health boost when moved
+float moveBoost = 10.0;       // 10pts health drain from neighbors when moved alone
+uint8_t bLeachLife = 0;       // boolean for health drain
+uint32_t leachTime = 0;
+uint16_t leachBuffer = 600;
 
 // helpers for the pulse rate
 uint32_t timePassedBuffer = 0;
@@ -99,12 +89,14 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   uint32_t curTime = getTimer();
-
+  
   // check surroundings
   getNeighborStates(neighbors);
+  
+  bLeachLife = 0;  
 
   // if we are alive...
-  if(getState() == 1 || getState() == 2) {
+  if(getState() >= 1 && getState() <= 4) {
     // check how much life is remaining
     health -= damageRate * ((curTime - lastUpdateTime) / 1000.0);
     // same as health = health - ....;
@@ -112,77 +104,73 @@ void loop() {
     if(health <= 1.0) {
       // we are dead, show dead state
       health = 0.0;
-      setState(3);
+      setState(5);
     }
     else {
       // deal with a living tile here
-
-      uint8_t friends = 0;
-      uint8_t enemies = 0;
       uint8_t numNeighbors = 0;
+      uint8_t numAliveNeighbors = 0;
+
+      // count friends and enemies
+      for(uint8_t i=0; i<6; i++) {
+    
+        // count total number of neighbors
+        if(neighbors[i] != 0) {
+          
+          numNeighbors++;
+          aloneCount = 0;
+
+          // if a neighbor is leaching life
+          if(neighbors[i] == 3 || neighbors[i] == 4) {
+            bLeachLife = 1;
+          }
+          
+          if(neighbors[i] != 5) {
+            numAliveNeighbors++;
+          }
+        }
+      }
 
       // assume we are alone
       if(aloneCount < 254)
         aloneCount++;
 
-      // count friends and enemies
-      for(uint8_t i=0; i<6; i++) {
-
-        // count total number of neighbors
-        if(neighbors[i] != 0) {
-          numNeighbors++;
-          aloneCount = 0;
-        }
-
-        // check team purple first
-        if(team == 0) {                 // if on purple team
-          if(neighbors[i] == 1) {       // if purple neighbor
-            friends++;                  // count them as a friend
-          }
-          else if(neighbors[i] == 2) {  // if green neighbor
-            enemies++;                  // count them as an enemy
-          }
-        }
-        // check team green next
-        else if(team == 1) {            // if on green team
-          if(neighbors[i] == 2) {       // if green neighbor
-            friends++;                  // count them as a friend
-          }
-          else if(neighbors[i] == 1) {  // if purple neighbor
-            enemies++;                  // count them as an enemy
-          }
-        }
-      }
-
-      // determine rate of life based on surroundings (sad but true)
       if(numNeighbors != 0) {
         // we are not alone
-        // if we were, give a move boost
+        // if we were alone, suck health from each neighbor
         if(bAlone == 1) {
-          health += moveBoost;
+          health += moveBoost * numAliveNeighbors;
           bAlone = 0;
           boostTime = curTime;
+          //return to attached state
+          if(team == 0) {
+            setState(1);
+          }
+          else {
+            setState(2);
+          }
         }
-
-        if(friends > enemies) {
-          // don't die quickly
-          damageRate = 2.0;
-        }
-        else if (friends == enemies) {
-          // normal rate
-          damageRate = 3.0;
-        }
-        else { // implied friends < enemies
-          // surrounded by enemies, this is gonna be rough
-          damageRate = 4.0;
+        else  {
+          // we were not alone, check if we are being leached
+          if(bLeachLife && curTime - leachTime > leachBuffer) {
+            health -= moveBoost;
+            leachTime = curTime;
+          }
         }
       }
       else {
-        // we are lonely or being moved. stay at the current damage rate
+        // we are lonely or being moved. 
 
         // make sure we register as alone for 10 reads
         if(aloneCount > 10) {
           bAlone = 1;
+          // set state to moving
+          if(team == 0) {
+            setState(3);
+          }
+          else {
+            setState(4);
+          }
         }
       }
     }
@@ -198,24 +186,16 @@ void loop() {
   prevIdx = idx;
 
   // display your state based on the team you are on
-  if(getState() == 3) {
+  if(getState() == 5) {
     // display state using white (dead white)
     displayColor[0] = colors[2][0];
     displayColor[1] = colors[2][1];
     displayColor[2] = colors[2][2];
   }
-  else if(team == 0) {
-    // display state using purple
-    displayColor[0] = colors[0][0];
-    displayColor[1] = colors[0][1];
-    displayColor[2] = colors[0][2];
-  } else if(team == 1){
-    // display state using green
-    displayColor[0] = colors[1][0];
-    displayColor[1] = colors[1][1];
-    displayColor[2] = colors[1][2];
-  } else {
-    // how did we get here?
+  else{
+    displayColor[0] = colors[team][0];
+    displayColor[1] = colors[team][1];
+    displayColor[2] = colors[team][2];
   }
 
   uint8_t r, g, b;
@@ -237,11 +217,10 @@ void loop() {
     b = (displayColor[2] * (32 + brightness[idx]))/255.0;
   }
 
-
   displayColor[0] = r;
   displayColor[1] = g;
   displayColor[2] = b;
-
+  
   setColor(displayColor);
 
   lastUpdateTime = curTime;
