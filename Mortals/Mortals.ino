@@ -35,7 +35,7 @@
 
 uint8_t colors[3][3] = {{153,0,255},   // purple (player 1)
                        {64,255,0},     // green  (player 2)
-                       {255,255,255}}; // white  (dead state)
+                       {16,16,16}}; // white  (dead state)
 
 uint8_t brightness[60] = {
   64,71,77,84,90,96,102,107,
@@ -202,16 +202,17 @@ void loop() {
 
   uint8_t r, g, b;
   if(curTime - boostTime < boostDuration) {
-    if((curTime - boostTime / 200) % 2 == 0 ) {
-      r = displayColor[0];
-      g = displayColor[1];
-      b = displayColor[2];
-    }
-    else {
-      r = 0;
-      g = 0;
-      b = 0;
-    }
+    // fade back white for boost
+    float progress = (curTime - boostTime) / (float)boostDuration;
+    r = displayColor[0] * progress + 255 * (1.0 - progress);
+    g = displayColor[1] * progress + 255 * (1.0 - progress);
+    b = displayColor[2] * progress + 255 * (1.0 - progress);
+  }
+  else if(getState() == 5){
+    // if dead,barely pulse
+    r = (displayColor[0] * (2 + brightness[idx]))/255.0;
+    g = (displayColor[1] * (2 + brightness[idx]))/255.0;
+    b = (displayColor[2] * (2 + brightness[idx]))/255.0;
   }
   else {
     r = (displayColor[0] * (32 + brightness[idx]))/255.0;
