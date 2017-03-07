@@ -1,5 +1,7 @@
 /*  Mortals(Game)
  *
+ *  !!! Only works w/ AutomaTiles Legacy API !!!
+ *
  *  Setup: 2 player game. Tiles die slowly over time, all at the same rate. Moving a single tile to a new place allows it to suck life from surrounding tiles, friendly or enemy.
  *
  *  When a tile is moved, it sucks 10 points of health from its neighbors
