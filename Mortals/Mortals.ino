@@ -35,7 +35,12 @@
 
 uint8_t colors[3][3] = {{153,0,255},   // purple (player 1)
                        {64,255,0},     // green  (player 2)
-                       {16,16,16}}; // white  (dead state)
+                       {16,16,16}};    // white  (dead state)
+
+uint8_t team1Strong[3] = {153,0,255};   // purple (player 1)
+uint8_t team1Weak[3]   = {255,0,64};    // red (player 1)
+uint8_t team2Strong[3] = {64,255,0};    // green  (player 2)
+uint8_t team2Weak[3]   = {0,255,153};   // cyan  (player 2)
 
 uint8_t brightness[60] = {
   64,71,77,84,90,96,102,107,
@@ -195,9 +200,25 @@ void loop() {
     displayColor[2] = colors[2][2];
   }
   else{
-    displayColor[0] = colors[team][0];
-    displayColor[1] = colors[team][1];
-    displayColor[2] = colors[team][2];
+    // based on the amount of health fade towards a death color
+    float progHealth;
+    if(health > 100.0){
+      progHealth = 100.0;
+    }
+    else {
+      progHealth = health;
+    }
+    float progress = progHealth / 100.0;
+    if(team == 0) {      
+      displayColor[0] = team1Strong[0] * progress + team1Weak[0] * (1.0 - progress);
+      displayColor[1] = team1Strong[1] * progress + team1Weak[1] * (1.0 - progress);
+      displayColor[2] = team1Strong[2] * progress + team1Weak[2] * (1.0 - progress);
+    }
+    else if(team == 1) {      
+      displayColor[0] = team2Strong[0] * progress + team2Weak[0] * (1.0 - progress);
+      displayColor[1] = team2Strong[1] * progress + team2Weak[1] * (1.0 - progress);
+      displayColor[2] = team2Strong[2] * progress + team2Weak[2] * (1.0 - progress);
+    }
   }
 
   uint8_t r, g, b;
@@ -209,12 +230,13 @@ void loop() {
     b = displayColor[2] * progress + 255 * (1.0 - progress);
   }
   else if(getState() == 5){
-    // if dead,barely pulse
+    // if dead, barely pulse
     r = (displayColor[0] * (2 + brightness[idx]))/255.0;
     g = (displayColor[1] * (2 + brightness[idx]))/255.0;
     b = (displayColor[2] * (2 + brightness[idx]))/255.0;
   }
   else {
+    // pulse based on health
     r = (displayColor[0] * (32 + brightness[idx]))/255.0;
     g = (displayColor[1] * (32 + brightness[idx]))/255.0;
     b = (displayColor[2] * (32 + brightness[idx]))/255.0;
