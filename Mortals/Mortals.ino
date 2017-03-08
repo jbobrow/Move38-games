@@ -33,12 +33,15 @@
  *  03.06.2017
  */
 
-uint8_t deadWhite[3] = {16,16,16};    // white  (dead state)
+uint8_t deadWhite[3] = {16,16,16};      // white  (dead state)
 
 uint8_t team1Strong[3] = {255,0,64};    // red    (player 1 beginning of life)
 uint8_t team1Weak[3]   = {153,0,255};   // purple (player 1 end of life)
 uint8_t team2Strong[3] = {64,255,0};    // green  (player 2 beginning of life)
 uint8_t team2Weak[3]   = {0,255,153};   // cyan   (player 2 end of life)
+// future use
+uint8_t team3Strong[3] = {255,255,0};   // yellow (player 3 beginning of life)
+uint8_t team3Weak[3]   = {255,64,0};    // orange (player 3 end of life)
 
 uint8_t brightness[60] = {
   64,71,77,84,90,96,102,107,
