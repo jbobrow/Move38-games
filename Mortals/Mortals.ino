@@ -33,9 +33,7 @@
  *  03.06.2017
  */
 
-uint8_t colors[3][3] = {{153,0,255},   // purple (player 1)
-                       {64,255,0},     // green  (player 2)
-                       {16,16,16}};    // white  (dead state)
+uint8_t deadWhite[3] = {16,16,16};    // white  (dead state)
 
 uint8_t team1Strong[3] = {153,0,255};   // purple (player 1)
 uint8_t team1Weak[3]   = {255,0,64};    // red (player 1)
@@ -195,9 +193,9 @@ void loop() {
   // display your state based on the team you are on
   if(getState() == 5) {
     // display state using white (dead white)
-    displayColor[0] = colors[2][0];
-    displayColor[1] = colors[2][1];
-    displayColor[2] = colors[2][2];
+    displayColor[0] = deadWhite[0];
+    displayColor[1] = deadWhite[1];
+    displayColor[2] = deadWhite[2];
   }
   else{
     // based on the amount of health fade towards a death color
