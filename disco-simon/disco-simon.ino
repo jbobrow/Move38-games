@@ -37,6 +37,12 @@ uint8_t oldNeighborStates[6] = {0,0,0,0,0,0};     // gets old neighborstates for
 uint8_t foundDifferentNeighbor = 0;
 uint8_t uniqueNeighbor = 0;
 
+uint32_t nextPlayerDelay = 500;
+uint32_t timeOfPlayerSwitch = 0;
+
+uint32_t incorrectDisplayDelay = 2000;
+uint32_t timeOfIncorrect = 0;
+
 void setup() {
    setTimeout(180);  
    setColorRGB(255, 0, 255);
@@ -46,16 +52,20 @@ void loop() {
     
   //random color changes
   //----------------------------------------------------------------------
-  if(getState() != INCORRECT) {
-    if(getTimer() - lastChange > colorChangeDelay) {                        // if enough time has passed since last change
-      displayColor = displayColor % numColors == 0 ? 3 : 2;                 // advance color index
-      setColorRGB(colors[displayColor][0],                                  // set our color using the color index
-                  colors[displayColor][1], 
-                  colors[displayColor][2]);
-      lastChange = getTimer();                                              // mark the time of the state change
-    }
+  if(getTimer() - timeOfPlayerSwitch < nextPlayerDelay) {
+    setColorRGB(255,255,0); // turn yellow for player switch
   }
-
+  if(getTimer() - timeOfIncorrect < incorrectDisplayDelay) {
+    setColorRGB(255,255,255); // turn white for incorrect
+  }
+  else if(getTimer() - lastChange > colorChangeDelay) {                        // if enough time has passed since last change
+    displayColor = displayColor % numColors == 0 ? 3 : 2;                 // advance color index
+    setColorRGB(colors[displayColor][0],                                  // set our color using the color index
+                colors[displayColor][1], 
+                colors[displayColor][2]);
+    lastChange = getTimer();                                              // mark the time of the state change
+  }
+  
   //check for neighbor states shifting from ready to another state
   //----------------------------------------------------------------------
   
@@ -109,7 +119,7 @@ void loop() {
 
 }
 
-void buttonClicked(){
+void buttonPressed(){
         
   if (buttonSequence[buttonIndex] == 0) {        //if we've come to the end of the sequence
     buttonSequence[buttonIndex] = displayColor;  //add the pressed color to the remembered sequence of presses
@@ -124,6 +134,7 @@ void buttonClicked(){
               errorColor[1],
               errorColor[2]);  // turn the error color
         setState(INCORRECT);   // setState to INCORRECT to alert other tiles of an error
+        timeOfIncorrect = getTimer(); // time we failed miserably :) (go practice simon... fool)
         resetGame();           // Reset the game*
     }  
     else {
@@ -138,6 +149,7 @@ void buttonClicked(){
 void nextPlayer() {
   buttonIndex = 0; //set the buttonIndex back to the beginning of the remembered sequence
   //next player turn signal
+  timeOfPlayerSwitch = getTimer();
 }
 
 void resetGame() { // Reset the game
@@ -148,11 +160,11 @@ void resetGame() { // Reset the game
   buttonIndex = 0; //set the index for checking color state back to zero)
 }
 
+void buttonClicked() {}
+
 void buttonDoubleClicked(){}
 
 void buttonTripleClicked(){}
-
-void buttonPressed() {}
 
 void buttonReleased() {}
 
