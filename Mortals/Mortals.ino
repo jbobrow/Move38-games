@@ -70,7 +70,7 @@ uint8_t bDidLongPress = 0;
 // show when receive boost by glowing brighter
 uint32_t boostTime = 0;
 //uint16_t boostHoldoff = 600;  // prevent multiple boosts... not in use
-uint16_t boostDuration = 200;
+uint16_t boostDuration = 300;
 
 uint32_t gameStartTime = 0;   // to know how far into the game we are
 float health = 120.0;         // 120pts health for start of life
@@ -122,7 +122,6 @@ void loop() {
       uint8_t numNeighbors = 0;
       uint8_t numAliveNeighbors = 0;
 
-      // count friends and enemies
       for(uint8_t i=0; i<6; i++) {
     
         // count total number of neighbors
@@ -152,7 +151,10 @@ void loop() {
         if(bAlone == 1) {
           health += moveBoost * numAliveNeighbors;
           bAlone = 0;
-          boostTime = curTime;
+          // only show boost animation if attaching to at least one living tile to leach from
+          if(numAliveNeighbors != 0) {
+            boostTime = curTime;
+          }
           //return to attached state
           if(team == 0) {
             setState(1);
@@ -232,6 +234,8 @@ void loop() {
     r = displayColor[0] * progress + 255 * (1.0 - progress);
     g = displayColor[1] * progress + 255 * (1.0 - progress);
     b = displayColor[2] * progress + 255 * (1.0 - progress);
+    // set the index of the pulse to the brightest point to start
+    prevIdx = 0;
   }
   else if(getState() == 5){
     // if dead, barely pulse
