@@ -65,9 +65,10 @@ uint8_t team = 0; // which team are we part of purple or green (player 1 or play
 uint32_t lastPressTime = 0;
 uint8_t bDidLongPress = 0;
 
-// show when receive boost by flashing for 600 milliseconds (2 flashes)
+// show when receive boost by glowing brighter
 uint32_t boostTime = 0;
-uint16_t boostDuration = 600;
+//uint16_t boostHoldoff = 600;  // prevent multiple boosts... not in use
+uint16_t boostDuration = 200;
 
 uint32_t gameStartTime = 0;   // to know how far into the game we are
 float health = 120.0;         // 120pts health for start of life
