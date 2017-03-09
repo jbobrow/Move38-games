@@ -47,7 +47,7 @@ void loop() {
       pressedColor = index + 2;  // will be compared to button press to decide if correct      
       setColorRGB(colors[index][0], colors[index][1], colors[index][2]);
       delayIndex = getTimer() % numDelays; //determine which delay to use
-      Pause = delays[delayIndex]; //choose a new random interval for next color change
+      Pause = 1000; // delays[delayIndex]; //choose a new random interval for next color change
     } //-----------------------------------------------------------------------------  
 
    //check for neighbor states shifting from ready to another state------------------
@@ -92,7 +92,7 @@ if (buttonSequence[buttonIndex] == 0) {//if we've come to the end of the sequenc
  
 else {  //Else we are in the middle of a sequence
         if (pressedColor != buttonSequence[buttonIndex]) { //If it’s an error       
-            fadeTo(errorColor[0], errorColor[1], errorColor[2], 1000);
+            fadeTo(errorColor[0], errorColor[1], errorColor[2], 200);
             setState(4);   //setState to 4 to alert other tiles of an error
             resetGame();   //Reset the game*
         }
