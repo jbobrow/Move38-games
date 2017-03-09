@@ -44,14 +44,16 @@ uint8_t team3Strong[3] = {255,255,0};   // yellow (player 3 beginning of life)
 uint8_t team3Weak[3]   = {255,64,0};    // orange (player 3 end of life)
 
 uint8_t brightness[60] = {
-  64,71,77,84,90,96,102,107,
-  112,116,119,122,125,127,128,128,
-  128,127,125,122,119,116,112,107,
-  102,96,90,84,77,71,64,57,
-  51,44,38,32,26,21,16,12,
-  9,6,3,1,0,0,0,1,
-  3,6,9,12,16,21,26,32,
-  38,44,51,57};
+  128,128,128,127,125,122,
+  119,116,112,107,102,96,
+  90,84,77,71,64,57,
+  51,44,38,32,26,21,
+  16,12,9,6,3,1,
+  0,0,0,1,3,6,
+  9,12,16,21,26,32,
+  38,44,51,57,64,71,
+  77,84,90,96,102,107,
+  112,116,119,122,125,127};
 
 uint8_t displayColor[3];
 
@@ -225,7 +227,7 @@ void loop() {
 
   uint8_t r, g, b;
   if(curTime - boostTime < boostDuration) {
-    // fade back white for boost
+    // fade from white for boost
     float progress = (curTime - boostTime) / (float)boostDuration;
     r = displayColor[0] * progress + 255 * (1.0 - progress);
     g = displayColor[1] * progress + 255 * (1.0 - progress);
