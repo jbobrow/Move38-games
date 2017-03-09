@@ -2,7 +2,7 @@
  *  Competitive Disco Simon
  *   
  *  by Nick Bentley
- *  01.28.2017
+ *  03.09.2017
  */
  
 uint8_t colors[2][3] = {{204,0,0},        // Red
