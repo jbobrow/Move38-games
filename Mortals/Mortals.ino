@@ -69,7 +69,7 @@ uint8_t bDidLongPress = 0;
 
 // show when receive boost by glowing brighter
 uint32_t boostTime = 0;
-//uint16_t boostHoldoff = 600;  // prevent multiple boosts... not in use
+uint16_t boostHoldoff = 1000;  // prevent boost on reset
 uint16_t boostDuration = 300;
 
 uint32_t gameStartTime = 0;   // to know how far into the game we are
@@ -145,44 +145,48 @@ void loop() {
       if(aloneCount < 254)
         aloneCount++;
 
-      if(numNeighbors != 0) {
-        // we are not alone
-        // if we were alone, suck health from each neighbor
-        if(bAlone == 1) {
-          health += moveBoost * numAliveNeighbors;
-          bAlone = 0;
-          // only show boost animation if attaching to at least one living tile to leach from
-          if(numAliveNeighbors != 0) {
-            boostTime = curTime;
-          }
-          //return to attached state
-          if(team == 0) {
-            setState(1);
-          }
-          else {
-            setState(2);
-          }
-        }
-        else  {
-          // we were not alone, check if we are being leached
-          if(bLeachLife && curTime - leachTime > leachBuffer) {
-            health -= moveBoost;
-            leachTime = curTime;
-          }
-        }
-      }
-      else {
-        // we are lonely or being moved. 
+      // prevent actions if just restarted (prevents accidental boosts)
+      if(getTimer() - gameStartTime > boostHoldoff) {
 
-        // make sure we register as alone for 10 reads
-        if(aloneCount > 10) {
-          bAlone = 1;
-          // set state to moving
-          if(team == 0) {
-            setState(3);
+        if(numNeighbors != 0) {
+          // we are not alone
+          // if we were alone, suck health from each neighbor
+          if(bAlone == 1) {
+            health += moveBoost * numAliveNeighbors;
+            bAlone = 0;
+            // only show boost animation if attaching to at least one living tile to leach from
+            if(numAliveNeighbors != 0) {
+              boostTime = curTime;
+            }
+            //return to attached state
+            if(team == 0) {
+              setState(1);
+            }
+            else {
+              setState(2);
+            }
           }
-          else {
-            setState(4);
+          else  {
+            // we were not alone, check if we are being leached
+            if(bLeachLife && curTime - leachTime > leachBuffer) {
+              health -= moveBoost;
+              leachTime = curTime;
+            }
+          }
+        }
+        else {
+          // we are lonely or being moved. 
+  
+          // make sure we register as alone for 10 reads
+          if(aloneCount > 10) {
+            bAlone = 1;
+            // set state to moving
+            if(team == 0) {
+              setState(3);
+            }
+            else {
+              setState(4);
+            }
           }
         }
       }
@@ -267,6 +271,8 @@ void loop() {
 void button() {
   if(getTimer() - lastPressTimes[0] < 1000 && getTimer() - lastPressTimes[1] < 2000) {
     // triple press
+    // set start time
+    gameStartTime = getTimer();
     // reset health
     health = 100.0;
     // set state based on team(color)
